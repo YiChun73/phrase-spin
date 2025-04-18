@@ -43,7 +43,6 @@ export class PhraseSpinElement extends LitElement {
   static styles = css`
     :host {
       display: inline-block;
-      overflow: hidden;
     }
     .animated {
       display: inline-block;

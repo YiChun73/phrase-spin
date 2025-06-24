@@ -13,7 +13,15 @@
 <body>
   <my-element>
     <h1>Vite + Lit</h1>
+    <!-- phrase-spin 使用範例：JSON 格式 -->
+    <phrase-spin phrases='["Hello","世界","Lit 元件"]' animation="bounceIn" speed="1500"></phrase-spin>
+
+    <!-- phrase-spin 使用範例：逗號分隔 -->
+    <phrase-spin phrases="A,B,C,D" animation="bounceIn" speed="1000"></phrase-spin>
   </my-element>
+
+
+  <script type="module" src="/src/components/phrase-spin.ts"></script>
 </body>
 
 </html>

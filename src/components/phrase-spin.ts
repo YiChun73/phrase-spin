@@ -7,7 +7,6 @@ export interface PhraseSpinOptions {
   phrases: string[]
   animation?: string    // CSS 動畫名稱
   speed?: number        // 旋轉速度（毫秒）
-  complete?: (currentPhrase: string) => void // 每次動畫後的 callback
 }
 
 /**
@@ -23,14 +22,10 @@ export class PhraseSpinElement extends LitElement {
   phrases: string[] = []
 
   @property({ type: String })
-  animation: string = 'bounceIn'  // 預設使用 bounceIn 動畫
+  animation: string = 'bounceIn'
 
   @property({ type: Number })
-  speed: number = 2000            // 預設每 2000 毫秒切換一次
-
-  // 完成 callback，當每次切換動畫結束時觸發
-  @property({ type: Function })
-  complete: ((currentPhrase: string) => void) | null = null
+  speed: number = 2000
 
   // 將 currentIndex 標記為反應性狀態
   @state()
@@ -94,18 +89,25 @@ export class PhraseSpinElement extends LitElement {
   // 當元件連線到 DOM 時，開始動畫並讀取 HTML 屬性設定
   connectedCallback(): void {
     super.connectedCallback()
-
     // 讀取 HTML 屬性並設定對應值
     const attrPhrases = this.getAttribute('phrases')
     if (attrPhrases) {
-      this.phrases = attrPhrases.split(',').map(p => p.trim())
+      // 支援 JSON 格式或逗號分隔
+      try {
+        const parsed = JSON.parse(attrPhrases)
+        if (Array.isArray(parsed)) {
+          this.phrases = parsed.map((p: any) => String(p))
+        } else {
+          this.phrases = attrPhrases.split(',').map(p => p.trim())
+        }
+      } catch {
+        this.phrases = attrPhrases.split(',').map(p => p.trim())
+      }
     }
-
     const attrAnimation = this.getAttribute('animation')
     if (attrAnimation) {
       this.animation = attrAnimation
     }
-
     const attrSpeed = this.getAttribute('speed')
     if (attrSpeed) {
       const parsedSpeed = parseInt(attrSpeed, 10)
@@ -113,7 +115,7 @@ export class PhraseSpinElement extends LitElement {
         this.speed = parsedSpeed
       }
     }
-
+    this.stop() // 先清除舊的 interval
     this.start() // 啟動動畫
   }
 
@@ -127,6 +129,7 @@ export class PhraseSpinElement extends LitElement {
    * 啟動動畫輪詢
    */
   public start(): void {
+    this.stop() // 先清除舊的 interval
     // 立即顯示第一個短語
     this.playAnimation()
     // 每隔 speed 時間輪播
@@ -152,12 +155,7 @@ export class PhraseSpinElement extends LitElement {
       return
     }
     this.currentIndex = (this.currentIndex + 1) % this.phrases.length
-
-    // 呼叫使用者提供的 complete callback
-    if (typeof this.complete === 'function') {
-      this.complete(this.phrases[this.currentIndex])
-    }
-    // 同時觸發一個自定義事件，提供更多擴展性
+    // 僅用事件通知
     this.dispatchEvent(new CustomEvent('animation-complete', {
       detail: { phrase: this.phrases[this.currentIndex] },
       bubbles: true,

@@ -191,3 +191,9 @@ export class PhraseSpinElement extends LitElement {
     `
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'phrase-spin': PhraseSpinElement
+  }
+}

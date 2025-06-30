@@ -89,6 +89,7 @@ export class PhraseSpinElement extends LitElement {
   // 當元件連線到 DOM 時，開始動畫並讀取 HTML 屬性設定
   connectedCallback(): void {
     super.connectedCallback()
+
     // 讀取 HTML 屬性並設定對應值
     const attrPhrases = this.getAttribute('phrases')
     if (attrPhrases) {
@@ -96,9 +97,11 @@ export class PhraseSpinElement extends LitElement {
       try {
         const parsed = JSON.parse(attrPhrases)
         if (Array.isArray(parsed)) {
-          this.phrases = parsed.map((p: any) => String(p))
+          this.phrases = parsed.map((p) => String(p))
+        } else if (typeof parsed === 'string') {
+          this.phrases = parsed.split(',').map(p => p.trim()) // <== 使用 parsed 而不是 attrPhrases
         } else {
-          this.phrases = attrPhrases.split(',').map(p => p.trim())
+          this.phrases = []
         }
       } catch {
         this.phrases = attrPhrases.split(',').map(p => p.trim())
